@@ -20,4 +20,5 @@ To send files read [this](https://developers.google.com/drive/api/v3/quickstart/
 
 ## Links
 [An article on using GoCV](https://habr.com/ru/company/skillbox/blog/462159/)
+
 [Article with examples of cross-compilation](https://habr.com/ru/post/249449/)

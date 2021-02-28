@@ -1,6 +1,6 @@
 //https://developers.google.com/drive/api/v3/quickstart/go
 
-package drive
+package main
 
 import (
 	"encoding/json"
@@ -73,7 +73,7 @@ func saveToken(path string, token *oauth2.Token) {
 	json.NewEncoder(f).Encode(token)
 }
 
-// cf
+// createFile
 func createFile(service *drive.Service, name string, mimeType string, content io.Reader, parentID string) (*drive.File, error) {
 	f := &drive.File{
 		MimeType: mimeType,
@@ -108,24 +108,41 @@ func main() {
 		log.Fatalf("Unable to retrieve Drive client: %v", err)
 	}
 
-	// отправка файлов(надо сделать цикл)
-	fmt.Printf("Time: '%s'\n", time.Now().String())
-	f, err := os.Open("video_2021-02-28_15:28:32.mkv")
-	if err != nil {
-		panic(fmt.Sprintf("cannot open file: %v", err))
+	var filesDir string = "files"
+	for {
+		if _, err := os.Stat(filesDir); !os.IsNotExist(err) {
+			files, err := ioutil.ReadDir(filesDir)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			if len(files) != 0 {
+				sendFileName := files[len(files)-1].Name()
+				f, err := os.Open(filesDir + "/" + sendFileName)
+				if err != nil {
+					panic(fmt.Sprintf("Cannot open file: %v", err))
+				}
+				defer f.Close()
+
+				folderID := "1qHfJiwwp9jeDQFVh-iAUVGKBahCjtSJc" // id папки Google Drive (смотри url)
+				file, err := createFile(srv, sendFileName, "application/octet-stream", f, folderID)
+
+				if err != nil {
+					log.Fatalf("Could not create file: %v\n", err)
+				} else {
+					fmt.Printf("File '%s' uploaded successfully\n", file.Name)
+					os.Remove(filesDir + "/" + sendFileName)
+				}
+			} else {
+				println("No files")
+				time.Sleep(5 * time.Second)
+			}
+		} else {
+			println("No folder")
+			time.Sleep(5 * time.Second)
+		}
+
 	}
-	defer f.Close()
-
-	folderID := "1qHfJiwwp9jeDQFVh-iAUVGKBahCjtSJc" // id папки Google Drive (смотри url)
-	file, err := createFile(srv, f.Name(), "application/octet-stream", f, folderID)
-
-	if err != nil {
-		log.Fatalf("Could not create file: %v\n", err)
-	}
-
-	fmt.Printf("File '%s' uploaded successfully\n", file.Name)
-	fmt.Printf("File Id: '%s' \n", file.Id)
-	fmt.Printf("Time: '%s'\n", time.Now().String())
 
 	/*r, err := srv.Files.List().PageSize(100).
 		Fields("nextPageToken, files(id, name)").Do()

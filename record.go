@@ -1,8 +1,9 @@
-package record
+package main
 
 import (
 	"image"
 	"log"
+	"os"
 	"time"
 
 	"gocv.io/x/gocv"
@@ -26,10 +27,18 @@ func main() {
 	var fps float64 = webcam.Get(gocv.VideoCaptureFPS)
 	var codec string = "MJPG"
 
-	var durationOneFileSeconds int = 60 // количество секунд видео в одном файле
-	var prefixPath string = "./video"
+	var durationOneFileSeconds int = 5 // количество секунд видео в одном файле
+	var filesDir string = "files"
+	var prefixPath string = filesDir + "/video"
 	var mediaContainer string = ".mkv"
 	var frameInOneFileCounter int = 0 // тупо счетчик
+
+	if _, err := os.Stat(filesDir); os.IsNotExist(err) {
+		err = os.Mkdir(filesDir, 0777)
+		if err != nil {
+			log.Fatalf("error create folder: '%s'", err)
+		}
+	}
 
 	fileName := prefixPath + time.Now().Format("_2006-01-02_15:04:05") + mediaContainer
 	videoFile, err := gocv.VideoWriterFile(fileName, codec, fps, frameWidth, frameHeight, true)
