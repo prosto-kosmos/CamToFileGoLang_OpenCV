@@ -16,7 +16,7 @@ Everything is now ready to run. Follow to start webcam recording:
 
 To send files read [this](https://developers.google.com/drive/api/v3/quickstart/go) and do:
 
-    go run save saveFile.go
+    go run saveFile.go
 
 ## Links
 [An article on using GoCV](https://habr.com/ru/company/skillbox/blog/462159/)
